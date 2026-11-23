@@ -22,12 +22,38 @@ struct Simulador {
     int algoritmo = 1;// 1=primer ajuste, 2=mejor ajuste
     int delay_ms = 800;
 
-    // Contadores de estadísticas
     int total_procesos_atendidos = 0;
     int suma_ciclos_atencion = 0;
     double suma_porcentaje_ocupacion = 0.0;
     int total_ciclos = 0;
 };
+void capturar(struct Simulador &sim){
+    int opcionMemoria;
+    do {
+        cout << "1. Seleccione tamano fijo de memoria (1 = 1MB, 4 = 4MB, 8 = 8MB): ";
+        cin >> opcionMemoria;
+    } while (opcionMemoria != 1 && opcionMemoria != 4 && opcionMemoria != 8);
+    sim.tam_memoria_kb = opcionMemoria * 1024;
+
+    do {
+        cout << "2. Seleccione Algoritmo (1 = Primer Ajuste, 2 = Mejor Ajuste): ";
+        cin >> sim.algoritmo;
+    } while (sim.algoritmo != 1 && sim.algoritmo != 2);
+
+    do {
+        cout << "3. Cuanto del sistema (ej. 2): ";
+        cin >> sim.cuanto_sistema;
+    } while (sim.cuanto_sistema <= 0);
+
+    do {
+        cout << "4. Tamano maximo de memoria por proceso en KB (32 - " << sim.tam_memoria_kb << "): ";
+        cin >> sim.max_tam_proceso;
+    } while (sim.max_tam_proceso < sim.MIN_SPLIT || sim.max_tam_proceso > sim.tam_memoria_kb);
+     do {
+        cout << "5. Tamano maximo del cuanto por proceso (ej. 10): ";
+        cin >> sim.max_cuanto_proceso;
+    } while (sim.max_cuanto_proceso <= 0);
+}
 
 int primerAjuste(const vector<Bloque>& memoria, int tamRequerido) {
     for (int i = 0; i < static_cast<int>(memoria.size()); i++) {
@@ -52,32 +78,36 @@ int mejorAjuste(const vector<Bloque>& memoria, int tamRequerido) {
 }
 
 bool colocarProceso(Simulador& sim, int id, int tam, int cuanto) {
-    int idx = -1;
+    int indice = -1;
 
     if (sim.algoritmo == 1) {
-        idx = primerAjuste(sim.memoria, tam);
+        indice = primerAjuste(sim.memoria, tam);
     } else {
-        idx =  mejorAjuste(sim.memoria, tam);
+        indice =  mejorAjuste(sim.memoria, tam);
     }
-    if (idx == -1) {
+    if (indice == -1) {
         return false; // No hay espacio disponible
     }
 
-    int sobrante = sim.memoria[idx].tamano - tam;
+    int sobrante = sim.memoria[indice].tamano - tam;
     if (sobrante >= sim.MIN_SPLIT) {
-        sim.memoria[idx].id = id;
-        sim.memoria[idx].tamano = tam;
-        sim.memoria[idx].cuanto = cuanto;
-        sim.memoria[idx].ciclo_entrada = sim.total_ciclos;
+        sim.memoria[indice].id = id;
+        sim.memoria[indice].tamano = tam;
+        sim.memoria[indice].cuanto = cuanto;
+        sim.memoria[indice].ciclo_entrada = sim.total_ciclos;
 
         Bloque nuevo_hueco = {0, sobrante, 0, 0};
-        sim.memoria.insert(sim.memoria.begin() + idx + 1, nuevo_hueco);
+        sim.memoria.insert(sim.memoria.begin() + indice + 1, nuevo_hueco);
     } else {
-        sim.memoria[idx].id = id;
-        sim.memoria[idx].cuanto = cuanto;
-        sim.memoria[idx].ciclo_entrada = sim.total_ciclos;
+        sim.memoria[indice].id = id;
+        sim.memoria[indice].cuanto = cuanto;
+        sim.memoria[indice].ciclo_entrada = sim.total_ciclos;
     }
 
     sim.cola_rr.push(id);
     return true;
+}
+int main(){
+
+    return 0;
 }
