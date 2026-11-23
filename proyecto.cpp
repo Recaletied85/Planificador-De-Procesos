@@ -41,7 +41,7 @@ void capturar(struct Simulador &sim){
     } while (sim.algoritmo != 1 && sim.algoritmo != 2);
 
     do {
-        cout << "3. Cuanto del sistema (ej. 2): ";
+        cout << "3. Cuanto del sistema: ";
         cin >> sim.cuanto_sistema;
     } while (sim.cuanto_sistema <= 0);
 
@@ -50,7 +50,7 @@ void capturar(struct Simulador &sim){
         cin >> sim.max_tam_proceso;
     } while (sim.max_tam_proceso < sim.MIN_SPLIT || sim.max_tam_proceso > sim.tam_memoria_kb);
      do {
-        cout << "5. Tamano maximo del cuanto por proceso (ej. 10): ";
+        cout << "5. Tamano maximo del cuanto por proceso: ";
         cin >> sim.max_cuanto_proceso;
     } while (sim.max_cuanto_proceso <= 0);
 }
@@ -108,6 +108,7 @@ bool colocarProceso(Simulador& sim, int id, int tam, int cuanto) {
     return true;
 }
 int main(){
-
+    Simulador s;
+    capturar(s);
     return 0;
 }
