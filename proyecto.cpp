@@ -54,7 +54,14 @@ void capturar(struct Simulador &sim){
         cin >> sim.max_cuanto_proceso;
     } while (sim.max_cuanto_proceso <= 0);
 }
-
+int BuscarProc(const vector<Bloque> &memoria, int indice){
+    for(int i=0; i<static_cast<int> (memoria.size()); i++){
+        if(memoria[i].id=indice){
+            return i;
+        }
+    }
+    return -1;
+}
 int primerAjuste(const vector<Bloque>& memoria, int tamRequerido) {
     for (int i = 0; i < static_cast<int>(memoria.size()); i++) {
         if (memoria[i].id == 0 && memoria[i].tamano >= tamRequerido) {
