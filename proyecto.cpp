@@ -189,10 +189,23 @@ void RounRobin(Simulador &simulador){
 }
 
 int main(){
+    srand(time(0));
     Simulador s;
     capturar(s);
+    s.memoria.push_back({0,s.tamMemoria,0,0});
     Bloque proceso = {0,0,0,0};
     randomProceso(proceso, s);
-
+    int ciclosPrueba=20;
+    while(ciclosPrueba>s.totalCiclos){
+        s.totalCiclos++;
+        cout<<"CICLO \t\t\t"<< s.totalCiclos<<"\n";
+        if(colocarProceso(s,proceso.id, proceso.tam, proceso.cuanto)){
+            randomProceso(proceso,s);
+            cout<<"Entrando: "<< "["<< proceso.id <<","<< proceso.tam <<","<<proceso.cuanto <<"]";
+        }else{
+            cout<<"proceso: "<<proceso.id<< "en espera";
+        }
+        RounRobin(s);
+    }
     return 0;
 }
