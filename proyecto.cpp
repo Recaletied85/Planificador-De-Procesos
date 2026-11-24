@@ -117,22 +117,29 @@ bool colocarProceso(Simulador& simulador, int id, int tam, int cuanto) {
 
 void imprimirLista(Simulador &simulador){
     if(simulador.cola_rr.empty()){
-        cout <<"LISTA VACIA";
+        cout <<"LISTA VACIA" << endl;
     }else{
         queue<int> temp;
         temp=simulador.cola_rr;
+        cout << "Lista RR: ";
         while(!temp.empty()){
             int proc= temp.front();
             temp.pop();
             int indice= BuscarProc(simulador.memoria, proc);
-            if(indice==-1){
+            if(indice!=-1){
                 const Bloque& proceso =simulador.memoria[indice];
                 cout <<"["<< proceso.id<<","<<proceso.tam<<","<<proceso.cuanto<<"]";
             }
         }
-        "\n";
+        cout << endl;
     }
+}
 
+void imprimirMemoria(const vector<Bloque>&memoria){
+    for (const Bloque &b: memoria){
+        cout <<"["<< b.id<<","<<b.tam<<","<<b.cuanto<<"]";
+    }
+    cout<<"\n";
 }
 
 void condensarHueco(vector<Bloque> &memoria){
@@ -143,9 +150,14 @@ void condensarHueco(vector<Bloque> &memoria){
         if(memoria[i].id == 0 && memoria[i+1].id == 0){
             memoria[i].tam += memoria[i+1].tam;
             memoria.erase(memoria.begin()+i+1);
+            condensacion = true;
         } else {
             i++;
         }
+    }
+    if(condensacion){
+        cout << "Condensando huecos: " << endl;
+        imprimirMemoria(memoria);
     }
 }
 
@@ -155,12 +167,7 @@ void randomProceso(Bloque &procesoBase, const Simulador &simulador){
     procesoBase.cuanto = 1 + (rand()% simulador.cuantoMaxProceso);
     procesoBase.cicloActual = 0;
 }
-void imprimirMemoria(const vector<Bloque>&memoria){
-    for (const Bloque &b: memoria){
-        cout <<"["<< b.id<<","<<b.tam<<","<<b.cuanto<<"]\n";
-    }
-    cout<<"\n";
-}
+
 void RounRobin(Simulador &simulador){
     if(simulador.cola_rr.empty()){
         return;
@@ -170,20 +177,21 @@ void RounRobin(Simulador &simulador){
     int indice=BuscarProc(simulador.memoria, atenderproc);
     if(indice !=-1){
         Bloque &proceso= simulador.memoria[indice];
-        cout << "Atendiendo: "<<"\n";
+        cout << "Atendiendo: " << endl;
         cout <<"["<< proceso.id<<","<<proceso.tam<<","<<proceso.cuanto<<"]\n";
         proceso.cuanto -= simulador.cuantoSistema;
-        if(proceso.cuanto>0){ simulador.cola_rr.push(proceso.id);
-        imprimirLista(simulador);
-        imprimirMemoria(simulador.memoria);
+        if(proceso.cuanto>0){ 
+            simulador.cola_rr.push(proceso.id);
+            imprimirLista(simulador);
+            imprimirMemoria(simulador.memoria);
         }else {
             proceso.cuanto=0;
             imprimirLista(simulador);
-            cout << "Descargando: "<<"\n";
+            cout << "Descargando: "<< endl;;
             cout <<"["<< proceso.id<<","<<proceso.tam<<","<<proceso.cuanto<<"]\n";
-             proceso.id=0;
-             imprimirMemoria(simulador.memoria);
-             condensarHueco(simulador.memoria);
+            proceso.id=0;
+            imprimirMemoria(simulador.memoria);
+            condensarHueco(simulador.memoria);
         }
     }
 }
@@ -198,14 +206,16 @@ int main(){
     int ciclosPrueba=20;
     while(ciclosPrueba>s.totalCiclos){
         s.totalCiclos++;
-        cout<<"CICLO \t\t\t"<< s.totalCiclos<<"\n";
+        cout<<"CICLO \t\t\t"<< s.totalCiclos<< endl;
         if(colocarProceso(s,proceso.id, proceso.tam, proceso.cuanto)){
+            cout<<"Entrando: "<< "["<< proceso.id <<","<< proceso.tam <<","<<proceso.cuanto <<"]" << endl;
             randomProceso(proceso,s);
-            cout<<"Entrando: "<< "["<< proceso.id <<","<< proceso.tam <<","<<proceso.cuanto <<"]";
+            imprimirMemoria(s.memoria);
         }else{
             cout<<"proceso: "<<proceso.id<< "en espera";
         }
         RounRobin(s);
+        cout << endl;
     }
     return 0;
 }
