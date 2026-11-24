@@ -21,11 +21,8 @@ struct Simulador {
     int tamMaxProceso = 512;
     int cuantoMaxProceso = 10;
     int algoritmo = 1;// 1=primer ajuste, 2=mejor ajuste
+    int totalCiclos=0;
 
-    int procesosAtendidos = 0;
-    int sumCiclosProceso = 0;
-    double sumaPorcentajeOcupa = 0.0;
-    int totalCiclos = 0;
 };
 
 void capturar(struct Simulador &simulador){
@@ -128,7 +125,7 @@ void imprimirLista(Simulador &simulador){
             int proc= temp.front();
             temp.pop();
             int indice= BuscarProc(simulador.memoria, proc);
-            if(indice=-1){
+            if(indice==-1){
                 const Bloque& proceso =simulador.memoria[indice];
                 cout <<"["<< proceso.id<<","<<proceso.tam<<","<<proceso.cuanto<<"]";
             }
@@ -158,11 +155,44 @@ void randomProceso(Bloque &procesoBase, const Simulador &simulador){
     procesoBase.cuanto = 1 + (rand()% simulador.cuantoMaxProceso);
     procesoBase.cicloActual = 0;
 }
+void imprimirMemoria(const vector<Bloque>&memoria){
+    for (const Bloque &b: memoria){
+        cout <<"["<< b.id<<","<<b.tam<<","<<b.cuanto<<"]\n";
+    }
+    cout<<"\n";
+}
+void RounRobin(Simulador &simulador){
+    if(simulador.cola_rr.empty()){
+        return;
+    }
+    int atenderproc= simulador.cola_rr.front();
+    simulador.cola_rr.pop();
+    int indice=BuscarProc(simulador.memoria, atenderproc);
+    if(indice !=-1){
+        Bloque &proceso= simulador.memoria[indice];
+        cout << "Atendiendo: "<<"\n";
+        cout <<"["<< proceso.id<<","<<proceso.tam<<","<<proceso.cuanto<<"]\n";
+        proceso.cuanto -= simulador.cuantoSistema;
+        if(proceso.cuanto>0){ simulador.cola_rr.push(proceso.id);
+        imprimirLista(simulador);
+        imprimirMemoria(simulador.memoria);
+        }else {
+            proceso.cuanto=0;
+            imprimirLista(simulador);
+            cout << "Descargando: "<<"\n";
+            cout <<"["<< proceso.id<<","<<proceso.tam<<","<<proceso.cuanto<<"]\n";
+             proceso.id=0;
+             imprimirMemoria(simulador.memoria);
+             condensarHueco(simulador.memoria);
+        }
+    }
+}
 
 int main(){
     Simulador s;
     capturar(s);
     Bloque proceso = {0,0,0,0};
     randomProceso(proceso, s);
+
     return 0;
 }
