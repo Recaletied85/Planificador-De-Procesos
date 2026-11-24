@@ -107,6 +107,25 @@ bool colocarProceso(Simulador& sim, int id, int tam, int cuanto) {
     sim.cola_rr.push(id);
     return true;
 }
+void imprimirLista(Simulador &simulador){
+    if(simulador.cola_rr.empty()){
+        cout <<"LISTA VACIA";
+    }else{
+        queue<int> temp;
+        temp=simulador.cola_rr;
+        while(!temp.empty()){
+            int proc= temp.front();
+            temp.pop();
+            int indice= BuscarProc(simulador.memoria, proc);
+            if(indice=-1){
+                const Bloque& proceso =simulador.memoria[indice];
+                cout <<"["<< proceso.id<<","<<proceso.tamano<<","<<proceso.cuanto<<"]";
+            }
+        }
+        "\n";
+    }
+
+}
 int main(){
     Simulador s;
     capturar(s);
