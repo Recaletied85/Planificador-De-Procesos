@@ -219,7 +219,7 @@ int main() {
     srand(static_cast<unsigned int>(time(0)));
     Simulador s;
     capturar(s);
-    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpia el '\n' tras el último cin >>
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); //limpiar buffer 
 
     s.memoria.push_back({0, s.tamMemoria, 0, 0});
     Bloque proceso = {0, 0, 0, 0};
