@@ -2,6 +2,8 @@
 #include <vector>
 #include <queue>
 #include <ctime>
+#include <limits>
+#include <conio.h>
 using namespace std;
 
 struct Bloque {
@@ -51,6 +53,8 @@ void capturar(struct Simulador &simulador){
         cout << "5. Tamano maximo del cuanto por proceso: ";
         cin >> simulador.cuantoMaxProceso;
     } while (simulador.cuantoMaxProceso <= 0);
+
+    cout << "Presiona |s| o |S| para salir del simulador" << endl;
 }
 
 int BuscarProc(const vector<Bloque> &memoria, int indice){
@@ -195,27 +199,54 @@ void RounRobin(Simulador &simulador){
         }
     }
 }
+bool detenerSimulador(Simulador &simulador){
+  while (_kbhit()) {
+        char tecla = static_cast<char>(_getch());
+        if (tecla == 's' || tecla == 'S') {
+            cout << "\nSimulador detenido por el usuario. Total de ciclos: " << simulador.totalCiclos << endl;
+            return true;
+        }
+    }
+    return false;
+}
 
-int main(){
-    srand(time(0));
+void retrasarElCiclo(int milisegundos) {
+    clock_t start_time = clock();
+    while (clock() < start_time + milisegundos * CLOCKS_PER_SEC / 1000);
+}
+
+int main() {
+    srand(static_cast<unsigned int>(time(0)));
     Simulador s;
     capturar(s);
-    s.memoria.push_back({0,s.tamMemoria,0,0});
-    Bloque proceso = {0,0,0,0};
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpia el '\n' tras el último cin >>
+
+    s.memoria.push_back({0, s.tamMemoria, 0, 0});
+    Bloque proceso = {0, 0, 0, 0};
     randomProceso(proceso, s);
-    int ciclosPrueba=20;
-    while(ciclosPrueba>s.totalCiclos){
+
+    bool salir = false;
+    while (!salir) {
         s.totalCiclos++;
-        cout<<"CICLO \t\t\t"<< s.totalCiclos<< endl;
-        if(colocarProceso(s,proceso.id, proceso.tam, proceso.cuanto)){
-            cout<<"Entrando: "<< "["<< proceso.id <<","<< proceso.tam <<","<<proceso.cuanto <<"]" << endl;
-            randomProceso(proceso,s);
+        cout << "CICLO " << s.totalCiclos << endl;
+
+        if (colocarProceso(s, proceso.id, proceso.tam, proceso.cuanto)) {
+            cout << "Entrando: [" << proceso.id << "," << proceso.tam << "," << proceso.cuanto << "]" << endl;
+            randomProceso(proceso, s);
             imprimirMemoria(s.memoria);
-        }else{
-            cout<<"proceso: "<<proceso.id<< "en espera";
+        } else {
+            cout << "proceso: " << proceso.id << " en espera" << endl;
         }
+
         RounRobin(s);
+        retrasarElCiclo(2000);
+
+        if (detenerSimulador(s)) {
+            salir = true;
+        }
         cout << endl;
     }
+
     return 0;
 }
+
