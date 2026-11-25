@@ -212,8 +212,29 @@ bool detenerSimulador(Simulador &simulador){
 
 void retrasarElCiclo(int milisegundos) {
     clock_t start_time = clock();
-    while (clock() < start_time + milisegundos * CLOCKS_PER_SEC / 1000);
+    while (clock() < start_time + milisegundos * CLOCKS_PER_SEC / 3000);
 }
+
+void verificarHuecos(const Bloque &proceso, const Simulador &simulador) {
+    int cont = 0;
+    int correcto = 0;
+
+    for (size_t i = 0; i < simulador.memoria.size(); ++i) {
+        if (simulador.memoria[i].id == 0) {
+            cont++;
+            if (proceso.tam <= simulador.memoria[i].tam) {
+                correcto++;
+            }
+        }
+    }
+
+    if (correcto >= 3) {
+        cout << "--------------------------------------------------------------------" << endl;
+        cout << "Huecos libres: " << cont <<endl;
+        cout << "------------------------------------------------------------------------" << endl;
+    }
+}
+
 
 int main() {
     srand(static_cast<unsigned int>(time(0)));
@@ -231,16 +252,20 @@ int main() {
         cout << "CICLO " << s.totalCiclos << endl;
 
         if (colocarProceso(s, proceso.id, proceso.tam, proceso.cuanto)) {
-            cout << "Entrando: [" << proceso.id << "," << proceso.tam << "," << proceso.cuanto << "]" << endl;
+
+            Bloque entrante = proceso; // Proceso que sí entró en este ciclo
+            cout << "Entrando: [" << entrante.id << "," << entrante.tam << "," << entrante.cuanto << "]" << endl;
             randomProceso(proceso, s);
             imprimirMemoria(s.memoria);
+            verificarHuecos(entrante, s);
+        
         } else {
             cout << "proceso: " << proceso.id << " en espera" << endl;
         }
 
         RounRobin(s);
         retrasarElCiclo(2000);
-
+        
         if (detenerSimulador(s)) {
             salir = true;
         }
